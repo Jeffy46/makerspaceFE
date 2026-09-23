@@ -1,0 +1,39 @@
+.bg-hero {
+  background-image: url('./assets/space-singer-students-rocket.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  height: 600px;
+}
+
+.bg-the-space {
+  background-image: url('//uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/space-herrera-kukta-shurz-1.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  height: 400px;
+}
+
+.bg-innovation-lab {
+  background-image: url('//uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/IMG_9840.jpeg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  height: 400px;
+}
+
+.bg-tll-lab {
+  background-image: url('https://uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/IMG_8987.PNG');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  height: 400px;
+}
+
+.bg-third-space {
+  background-image: url('//uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/IMG_9828.jpeg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  height: 400px;
+}

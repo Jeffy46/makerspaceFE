@@ -1,0 +1,37 @@
+@import url('https://googleapis.com');
+@import "tailwindcss";
+
+@theme {
+  --color-sbu-red: #990000;
+  --color-sbu-bright-red: #D52027;
+  --color-sbu-navy-blue: #001A3D;
+  --color-sbu-royal-blue: #00549A;
+  --color-sbu-dark-gray: #4B4B4B;
+  --font-alumni: 'Alumni Sans', sans-serif;
+}
+
+* {
+  font-family: var(--font-alumni);
+}
+
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #2d3748;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #991b1b;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7f1d1d;
+}
