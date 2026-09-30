@@ -27,13 +27,7 @@ let Navbar = () => {
           >
             Announcements
           </HashLink>
-          <HashLink
-            className="hover:text-gray-200 transition"
-            smooth
-            to={"/#map-section"}
-          >
-            Map
-          </HashLink>
+
           <HashLink className="hover:text-gray-200 transition" to={"/workshop"}>
             Workshops
           </HashLink>
