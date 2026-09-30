@@ -12,7 +12,7 @@ let Arrow = () => (
 );
 
 let Poster = ({ w, featured = false }: { w: Workshop; featured?: boolean }) => (
-  <figure className="group flex flex-col border border-gray-200 bg-white p-3 shadow-sm">
+  <figure className="group flex flex-col border border-gray-200 bg-white p-3 shadow-sm border-b-4 border-r-4">
     <div
       className={`overflow-hidden bg-gray-100 ${
         featured
@@ -39,7 +39,7 @@ let Poster = ({ w, featured = false }: { w: Workshop; featured?: boolean }) => (
 );
 
 let Workshops = () => {
-  let hideShowMore = "/workshop" == location.pathname;
+  let notHomepage = "/workshop" == location.pathname;
   let [events, setEvents] = useState<Workshop[]>([]);
   useEffect(() => {
     const tempData: Workshop[] = [
@@ -78,25 +78,29 @@ let Workshops = () => {
     <section
       id="workshops"
       aria-labelledby="workshops-heading"
-      className="bg-white px-6 py-12 md:px-8 md:py-16"
+      className={`${!notHomepage ? "bg-white/20" : "bg-white/20"} px-6 py-12 md:px-8 md:py-16 '`}
     >
       <div className="container mx-auto">
-        <div className="flex items-end justify-between gap-4 border-b border-gray-200 pb-4 mb-8">
+        <div
+          className={`${!notHomepage ? "bg-white" : ""} flex items-end justify-between gap-4 border-l-0 border-b-4 border-r-4 border-gray-200 mb-8 p-1 bg-white flex-col sm:flex-row`}
+        >
           <div>
             <h2
               id="workshops-heading"
-              className="text-3xl md:text-4xl font-bold text-sbu-navy-blue"
+              className={`${!notHomepage ? "text-sbu-navy-blue" : "text-sbu-navy-blue"} text-3xl md:text-4xl p-2 font-bold`}
             >
               Upcoming Workshops
             </h2>
-            <p className="mt-1 text-gray-600">
+            <p
+              className={`${!notHomepage ? "text-sbu-navy-blue" : "text-sbu-navy-blue"} p-2 mt-1'`}
+            >
               Learn a new tool, meet other makers, and bring your project.
             </p>
           </div>
-          {!hideShowMore && (
+          {!notHomepage && (
             <HashLink
               to="/workshop"
-              className="shrink-0 font-bold text-sbu-navy-blue border-b-2 border-sbu-bright-red pb-0.5 transition hover:text-sbu-bright-red focus:outline-none focus-visible:ring-2 focus-visible:ring-sbu-navy-blue"
+              className="text-sbu-navy-blue shrink-0 whitespace-nowrap font-bold text-black border-b-2 border-sbu-bright-red pb-0.5 transition hover:text-sbu-bright-red focus:outline-none focus-visible:ring-2 focus-visible:ring-sbu-navy-blue mb-2 mr-4"
             >
               See all workshops
             </HashLink>

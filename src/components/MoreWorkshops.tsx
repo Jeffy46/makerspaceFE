@@ -11,7 +11,7 @@ let Arrow = () => (
 );
 
 let Poster = ({ w, featured = false }: { w: Workshop; featured?: boolean }) => (
-  <figure className="group flex flex-col border border-gray-200 bg-white p-3 shadow-sm">
+  <figure className="group flex flex-col border-2 border-gray-200 bg-white p-1 shadow-sm">
     <div
       className={`overflow-hidden bg-gray-100 ${
         featured
@@ -28,7 +28,7 @@ let Poster = ({ w, featured = false }: { w: Workshop; featured?: boolean }) => (
         loading="lazy"
       />
     </div>
-    <figcaption className="mt-3 flex">
+    <figcaption className="mt-2 flex">
       <p className="text-sm font-bold text-sbu-navy-blue">{w.title}</p>
       <span className="ml-auto">
         <Arrow></Arrow>
@@ -183,26 +183,12 @@ let MoreWorkshops = () => {
   return (
     <section
       aria-labelledby="more-workshops-heading"
-      className="bg-gray-50 px-6 py-12 md:px-8 md:py-16"
+      className="bg-white/20  px-6 py-12 md:px-8 md:py-16"
     >
       <div className="container mx-auto">
-        <div className="mb-8 border-b border-gray-200 pb-4">
-          <h2
-            id="more-workshops-heading"
-            className="text-3xl font-bold text-sbu-navy-blue"
-          >
-            More Workshops
-          </h2>
-
-          <p className="mt-1 text-gray-600">
-            Explore more upcoming and past workshops.
-          </p>
-        </div>
-
-        {/* Other upcoming workshops */}
         {otherWorkshops.length > 0 && (
-          <div className="mb-12">
-            <h3 className="mb-5 text-2xl font-bold text-sbu-navy-blue">
+          <div className="border-r-4 border-gray-200 mb-12 bg-white">
+            <h3 className="mb-4 text-2xl font-bold text-sbu-navy-blue">
               Other Upcoming Workshops
             </h3>
 
@@ -214,12 +200,9 @@ let MoreWorkshops = () => {
           </div>
         )}
 
-        {/* Past workshops */}
         {pastWorkshops.length > 0 && (
-          <div>
-            <h3 className="mb-5 text-2xl font-bold text-sbu-navy-blue">
-              Past Workshops
-            </h3>
+          <div className=" border-r-4 border-gray-200 bg-white ">
+            <h3 className="mb-5 text-2xl font-bold text-">Past Workshops</h3>
 
             <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
               {pastWorkshops.map((w) => (
