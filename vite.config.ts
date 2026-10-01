@@ -6,7 +6,7 @@ import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/mock/",
+  base: "/makerspaceFE/",
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] }),
