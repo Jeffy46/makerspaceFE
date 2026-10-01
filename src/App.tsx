@@ -6,7 +6,7 @@ import WorkshopPage from "./pages/WorkshopPage";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="makerspaceFE">
       <MagneticDots />
       <div className="relative z-10">
         <Navbar />

@@ -60,10 +60,10 @@ let Announcements = () => {
       className="bg-white/20 px-6 py-12 md:px-8 md:py-16"
     >
       <div className="container mx-auto">
-        <div className="border-b border-gray-200 pb-4 mb-8 bg-white border-b-4 border-r-4">
+        <div className="border-b border-gray-200 p-2 mb-8 bg-sbu-light-gray border-b-4 border-r-4 flex items-center">
           <h2
             id="announcements-heading"
-            className="flex items-center text-3xl md:text-4xl font-bold text-sbu-navy-blue"
+            className="text-3xl md:text-4xl font-bold text-sbu-navy-blue"
           >
             <i
               className="fa-solid fa-bullhorn mr-3 text-sbu-bright-red"
@@ -91,7 +91,7 @@ let Announcements = () => {
           {announcements.map((a) => (
             <article
               key={a.id}
-              className="border-b-4 border-r-4 border-gray-200 bg-white p-5 shadow-sm"
+              className="border-b-4 border-r-4 border-gray-200 bg-sbu-light-gray p-5 shadow-sm"
             >
               <time dateTime={a.date} className="text-sm text-gray-500">
                 {formatDate(a.date)}

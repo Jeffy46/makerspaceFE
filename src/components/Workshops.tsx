@@ -11,8 +11,18 @@ let Arrow = () => (
   </svg>
 );
 
-let Poster = ({ w, featured = false }: { w: Workshop; featured?: boolean }) => (
-  <figure className="group flex flex-col border border-gray-200 bg-white p-3 shadow-sm border-b-4 border-r-4">
+let Poster = ({
+  w,
+  featured = false,
+  notHomepage,
+}: {
+  w: Workshop;
+  featured?: boolean;
+  notHomepage: boolean;
+}) => (
+  <figure
+    className={`${!notHomepage ? "bg-sbu-light-gray" : "bg-sbu-medium-gray"} group flex flex-col border border-gray-200 bg-sbu-light-gray p-3 shadow-sm border-b-4 border-r-4group flex flex-col border border-gray-200 p-3 shadow-sm border-b-4 border-r-4`}
+  >
     <div
       className={`overflow-hidden bg-gray-100 ${
         featured
@@ -78,11 +88,11 @@ let Workshops = () => {
     <section
       id="workshops"
       aria-labelledby="workshops-heading"
-      className={`${!notHomepage ? "bg-white/20" : "bg-white/20"} px-6 py-12 md:px-8 md:py-16 '`}
+      className={`${!notHomepage ? "bg-white/20" : "bg-white/20"} px-6 py-12 md:px-8 md:py-16'`}
     >
       <div className="container mx-auto">
         <div
-          className={`${!notHomepage ? "bg-white" : ""} flex items-end justify-between gap-4 border-l-0 border-b-4 border-r-4 border-gray-200 mb-8 p-1 bg-white flex-col sm:flex-row`}
+          className={`${!notHomepage ? "bg-sbu-light-gray" : "bg-sbu-medium-gray"} flex items-end justify-between gap-4 border-l-0 border-b-4 border-r-4 border-gray-200 mb-8 p-1 flex-col sm:flex-row`}
         >
           <div>
             <h2
@@ -108,10 +118,10 @@ let Workshops = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[7fr_3fr]">
-          <Poster w={featured} featured />
+          <Poster w={featured} notHomepage={notHomepage} featured />
           <div className="grid grid-cols-2 gap-6 md:grid-cols-1">
             {rest.map((w) => (
-              <Poster key={w.event_id} w={w} />
+              <Poster key={w.event_id} w={w} notHomepage={notHomepage} />
             ))}
           </div>
         </div>

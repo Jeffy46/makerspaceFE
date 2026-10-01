@@ -11,7 +11,7 @@ let Arrow = () => (
 );
 
 let Poster = ({ w, featured = false }: { w: Workshop; featured?: boolean }) => (
-  <figure className="group flex flex-col border-2 border-gray-200 bg-white p-1 shadow-sm">
+  <figure className="group flex flex-col border-2 border-gray-200 bg-sbu-light-gray p-1 shadow-sm">
     <div
       className={`overflow-hidden bg-gray-100 ${
         featured
@@ -183,16 +183,16 @@ let MoreWorkshops = () => {
   return (
     <section
       aria-labelledby="more-workshops-heading"
-      className="bg-white/20  px-6 py-12 md:px-8 md:py-16"
+      className="bg-white/20  px-6 py-8 md:px-8 md:py-12"
     >
       <div className="container mx-auto">
         {otherWorkshops.length > 0 && (
-          <div className="border-r-4 border-gray-200 mb-12 bg-white">
-            <h3 className="mb-4 text-2xl font-bold text-sbu-navy-blue">
+          <div className="border-r-4 border-b-4 border-gray-200 mb-12 bg-sbu-medium-gray">
+            <h3 className="text-2xl font-bold text-sbu-navy-blue p-2 pl-4">
               Other Upcoming Workshops
             </h3>
 
-            <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 p-4">
               {otherWorkshops.map((w) => (
                 <Poster key={w.event_id} w={w} />
               ))}
@@ -201,10 +201,12 @@ let MoreWorkshops = () => {
         )}
 
         {pastWorkshops.length > 0 && (
-          <div className=" border-r-4 border-gray-200 bg-white ">
-            <h3 className="mb-5 text-2xl font-bold text-">Past Workshops</h3>
+          <div className="border-r-4 border-b-4 border-gray-200 bg-sbu-medium-gray">
+            <h3 className="text-2xl font-bold p-2 pl-4 text-sbu-navy-blue">
+              Past Workshops
+            </h3>
 
-            <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4 p-4">
               {pastWorkshops.map((w) => (
                 <Poster key={w.event_id} w={w} />
               ))}
