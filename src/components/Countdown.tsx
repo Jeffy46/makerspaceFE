@@ -103,7 +103,7 @@ export default function Countdown({
   if (countdown.isInvalid) return <span role="alert">Invalid event time</span>;
   if (countdown.isExpired) return;
 
-  const { days, hours, minutes, seconds } = countdown;
+  const { days, hours, minutes } = countdown;
   return (
     <time role="timer" aria-live="off" dateTime={`P${days}DT${hours}H`}>
       {days}d {pad(hours)}h {pad(minutes)}m

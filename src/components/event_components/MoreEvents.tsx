@@ -1,15 +1,6 @@
 import { useEffect, useState } from "react";
 import { type Event } from "../../interfaces/Event";
 import Poster from "./Poster";
-let Arrow = () => (
-  <svg
-    aria-hidden="true"
-    viewBox="0 0 24 10"
-    className="inline-block w-6 h-2.5 ml-2 fill-current transition-transform group-hover:translate-x-1 motion-reduce:transition-none"
-  >
-    <path d="M0 4h20L16 .5 17 0l6.5 5L17 10l-1-.5L20 6H0z" />
-  </svg>
-);
 
 let MoreEvents = () => {
   let [otherEvents, setOtherEvents] = useState<Event[]>([]);
