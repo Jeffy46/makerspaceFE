@@ -2,8 +2,8 @@ import { HashLink } from "react-router-hash-link";
 
 let Hero = () => {
   return (
-    <header className="shadow-lg p-6 md:p-8 border bg-yellow-100 bg-hero flex items-center ">
-      <div className="w-full md:w-2/3 xl:w-1/2 min-h-64 bg-sbu-navy-blue grid grid-cols-1 md:grid-cols-2 gap-4 p-4 md:p-6 ml-auto">
+    <header className="shadow-lg p-6 md:p-8 border bg-yellow-100 bg-hero flex items-center">
+      <div className="w-full md:w-2/3 xl:w-1/2 min-h-64 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 md:p-6 ml-auto shadow-lg bg-sbu-navy-blue">
         <div className="flex flex-col p-4">
           <h1 className="text-4xl md:text-5xl font-bold">
             <p className="text-white">Innovate</p>

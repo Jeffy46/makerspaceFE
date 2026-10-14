@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * Renders a canvas field of dots connected to spring-based positions.
  * Pointer movement pulls nearby dots before they glide back into the grid.
@@ -7,11 +5,11 @@
 import { useEffect, useRef } from "react";
 
 // tune: raise to spread the dots farther apart
-const SPACING = 22;
+const SPACING = 25;
 // tune: raise to enlarge each dot
 const DOT_RADIUS = 1.5;
 // tune: raise to widen the magnetic field
-const INFLUENCE_R = 180;
+const INFLUENCE_R = 90;
 // tune: raise to quicken the return to the grid
 const SPRING_K = 0.055;
 // tune: raise to reduce velocity more quickly
@@ -21,7 +19,7 @@ const MAG_STRENGTH = 16;
 // tune: raise to quicken hover transitions
 const LERP_FACTOR = 0.06;
 // tune: raise to quicken pointer tracking
-const MOUSE_LERP = 0.14;
+const MOUSE_LERP = 1;
 
 type Dot = {
   restX: number;

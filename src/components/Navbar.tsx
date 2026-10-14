@@ -2,6 +2,7 @@ import { useState } from "react";
 import { HashLink } from "react-router-hash-link";
 let Navbar = () => {
   let [isMenuOpen, setIsMenuOpen] = useState(false);
+  let closeMenu = () => setIsMenuOpen(false);
   return (
     // Navigation
     <nav className="bg-sbu-red text-white shadow-lg sticky top-0 z-50">
@@ -28,7 +29,10 @@ let Navbar = () => {
             Announcements
           </HashLink>
 
-          <HashLink className="hover:text-gray-200 transition" to={"/workshop"}>
+          <HashLink
+            className="hover:text-gray-200 transition"
+            to={"/workshops"}
+          >
             Workshops
           </HashLink>
           <HashLink
@@ -41,7 +45,7 @@ let Navbar = () => {
         {/* Mobile Menu Button */}
         <button
           type="button"
-          className="md:hidden focus:outline-none focus:ring-2 focus:ring-white rounded"
+          className="md:hidden -mr-2 p-2 focus:outline-none focus:ring-2 focus:ring-white rounded "
           aria-label={
             isMenuOpen ? "Close navigation menu" : "Open navigation menu"
           }
@@ -49,12 +53,18 @@ let Navbar = () => {
           aria-controls="mobile-menu"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
-          <i
-            className={`fa-solid ${
-              isMenuOpen ? "fa-xmark" : "fa-bars"
-            } text-xl`}
+          <svg
             aria-hidden="true"
-          ></i>
+            viewBox="0 0 24 24"
+            className="h-6 w-6 fill-none stroke-current stroke-2"
+            strokeLinecap="round"
+          >
+            {isMenuOpen ? (
+              <path d="M6 6l12 12M18 6L6 18" />
+            ) : (
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
         </button>
       </div>
 
@@ -62,23 +72,50 @@ let Navbar = () => {
       {isMenuOpen && (
         <div
           id="mobile-menu"
-          className="md:hidden flex flex-col space-y-4 pt-4"
+          className="md:hidden flex flex-col border-t border-white/20 px-6 pb-3 pt-1 text-base font-medium"
         >
-          <HashLink smooth to="/#spaces">
+          <HashLink
+            className="block py-3 hover:text-gray-200 transition"
+            smooth
+            to="/#spaces"
+            onClick={closeMenu}
+          >
             Spaces
           </HashLink>
 
-          <HashLink smooth to="/#announcements">
+          <HashLink
+            className="block py-3 hover:text-gray-200 transition"
+            smooth
+            to="/#announcements"
+            onClick={closeMenu}
+          >
             Announcements
           </HashLink>
 
-          <HashLink smooth to="/#map-section">
+          <HashLink
+            className="block py-3 hover:text-gray-200 transition"
+            smooth
+            to="/#map-section"
+            onClick={closeMenu}
+          >
             Map
           </HashLink>
 
-          <HashLink to="/leaderboard">Top Makers</HashLink>
+          <HashLink
+            className="block py-3 hover:text-gray-200 transition"
+            to="/workshops"
+            onClick={closeMenu}
+          >
+            Workshops
+          </HashLink>
 
-          <HashLink to="/workshop">Workshops</HashLink>
+          <HashLink
+            className="block py-3 hover:text-gray-200 transition"
+            to="/leaderboard"
+            onClick={closeMenu}
+          >
+            Top Makers
+          </HashLink>
         </div>
       )}
     </nav>
