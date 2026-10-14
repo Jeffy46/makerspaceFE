@@ -20,7 +20,8 @@ let spaces: Space[] = [
   {
     name: "The Third Space",
     blurb:
-      "The Teaching & Learning Lab (TLL) is a digital studio dedicated to transforming education through multimedia, VR, 3D modeling, and interactive technology rather than hardware fabrication.",
+      "Located in the Staller Center for the Arts, The 3rd Space is a studio for mechatronic arts and digital fabrication where students blend technology and art using physical computing, 3D printers, and creative coding.",
+
     space_poster_path:
       "https://uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/IMG_8987.PNG",
     to: "https://www.youvisit.com/tour/map/stonybrook?loc=46:0:d",
@@ -28,7 +29,7 @@ let spaces: Space[] = [
   {
     name: "Teaching Learning Lab",
     blurb:
-      "Located in the Staller Center for the Arts, The 3rd Space is a studio for mechatronic arts and digital fabrication where students blend technology and art using physical computing, 3D printers, and creative coding.",
+      "The Teaching & Learning Lab (TLL) is a digital studio dedicated to transforming education through multimedia, VR, 3D modeling, and interactive technology rather than hardware fabrication.",
     space_poster_path:
       "https://uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/IMG_9828.jpeg",
     to: "https://www.youvisit.com/tour/map/stonybrook?loc=211:0:s",
