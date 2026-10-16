@@ -42,20 +42,24 @@ let Poster = ({
         className={`${notHomepage ? "bg-sbu-medium-gray" : "bg-sbu-light-gray"} flex h-full flex-col border border-b-4 border-r-4 border-gray-200 p-3 shadow-sm`}
       >
         <div
-          className={`relative overflow-hidden bg-gray-100 ${
-            featured
-              ? "aspect-[16/9] md:aspect-auto md:min-h-0 md:flex-1"
-              : "aspect-[21/9]"
-          }`}
+          className={`flex items-center relative overflow-hidden bg-gray-100 md:aspect-auto md:min-h-0 md:flex-1`}
         >
-          <img
-            className={`h-full w-full transition-transform duration-500 ease-out group-hover:scale-[1.02] motion-reduce:transition-none ${
-              ready ? "object-cover" : "object-scale-down"
-            }`}
-            src={ready ? e.event_poster_path : loadingGif}
-            alt={ready ? `${e.title} poster` : ""}
-            loading={featured ? "eager" : "lazy"}
-          />
+          <div className="h-60 w-full flex items-center">
+            <img
+              src={ready ? e.event_poster_path : loadingGif}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60 z-1"
+            />
+            <img
+              className={`lg:aspect-[21/9] transition-transform duration-500 ease-out group-hover:scale-[1.02] motion-reduce:transition-none z-2 ${
+                ready ? "object-cover" : "object-scale-down"
+              }`}
+              src={ready ? e.event_poster_path : loadingGif}
+              alt={ready ? `${e.title} poster` : ""}
+              loading={featured ? "eager" : "lazy"}
+            />
+          </div>
+
           {featured && ready && (
             <span className="absolute left-2 top-2 z-10 bg-sbu-bright-red px-2 py-1 text-sm font-bold text-white">
               Next up
@@ -69,24 +73,24 @@ let Poster = ({
               <span className="text-xs font-semibold">
                 {date.toLocaleDateString(undefined, { month: "short" })}
               </span>
-              <span className="text-lg font-bold">{date.getDate()}</span>
+              <span className="text-xs font-bold">{date.getDate()}</span>
             </div>
           )}
           <div className="min-w-0 flex-1">
             <p
-              className={`${featured ? "text-2xl" : "text-lg"} line-clamp-2 font-bold leading-snug text-sbu-navy-blue`}
+              className={`${featured ? "text-lg" : "text-sm"} line-clamp-2 font-bold leading-snug text-sbu-navy-blue`}
             >
               {e?.title}
             </p>
             {ready && validDate && (
               <time
                 dateTime={e.event_time}
-                className="mt-0.5 block text-sm text-sbu-navy-blue"
+                className="mt-0.5 block text-xs text-sbu-navy-blue"
               >
                 {`${date.toLocaleDateString(undefined, { weekday: "long" })}, ${date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`}
               </time>
             )}
-            <div className="mt-1 text-sm text-sbu-navy-blue">
+            <div className="mt-1 text-xs text-sbu-navy-blue">
               <Countdown event_time={e?.event_time ?? ""} />
             </div>
           </div>

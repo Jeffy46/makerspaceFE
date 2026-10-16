@@ -70,14 +70,14 @@ let Events = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-[7fr_3fr]">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[7fr_3fr]">
           <Poster
             e={featured}
             notHomepage={notHomepage}
             featured
             loading={loading}
           />
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-1">
+          <div className="grid grid-cols-1 gap-6">
             {rest.map((e, i) => (
               <Poster
                 key={e?.event_id ?? i}

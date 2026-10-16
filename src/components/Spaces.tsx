@@ -7,15 +7,15 @@ let spaces: Space[] = [
       "Located in Room 105 of the Engineering building, The Space is an innovation workshop where CEAS students can access fabrication tools, electronics, and open project hours after completing training.",
     space_poster_path:
       "https://uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/space-herrera-kukta-shurz-1.jpg",
-    to: "https://www.youvisit.com/tour/map/stonybrook?loc=302599:0:s",
+    to: "https://www.stonybrook.edu/mach1/the-space/",
   },
   {
-    name: "The Innovation Lab",
+    name: "The CAT Lab",
     blurb:
-      "Stony Brook University's Innovation Lab is an interdisciplinary hub where all students can turn ideas into reality using 3D printers, laser cutters, textiles equipment, and VR stations.",
+      "Stony Brook University's CAT Lab is an interdisciplinary hub where all students can turn ideas into reality using 3D printers, laser cutters, textiles equipment, and VR stations.",
     space_poster_path:
       "https://uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/IMG_9840.jpeg",
-    to: "https://www.youvisit.com/tour/map/stonybrook?loc=211:0:s",
+    to: "https://you.stonybrook.edu/catlab/",
   },
   {
     name: "The Third Space",
@@ -25,14 +25,6 @@ let spaces: Space[] = [
     space_poster_path:
       "https://uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/IMG_8987.PNG",
     to: "https://www.youvisit.com/tour/map/stonybrook?loc=46:0:d",
-  },
-  {
-    name: "Teaching Learning Lab",
-    blurb:
-      "The Teaching & Learning Lab (TLL) is a digital studio dedicated to transforming education through multimedia, VR, 3D modeling, and interactive technology rather than hardware fabrication.",
-    space_poster_path:
-      "https://uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/IMG_9828.jpeg",
-    to: "https://www.youvisit.com/tour/map/stonybrook?loc=211:0:s",
   },
 ];
 
@@ -44,7 +36,7 @@ let ribbons = [
   },
   {
     label: "Workshops",
-    to: "/workshop#top",
+    to: "/workshops#top",
     bg: "from-[#0a6b7a] to-[#0aa0b5]",
   },
   {
@@ -106,11 +98,11 @@ let Spaces = () => {
             id="spaces-heading"
             className="text-5xl font-bold text-white md:text-6xl"
           >
-            Find a Space Around Campus
+            Visit a Space Around Campus
           </h2>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 items-start gap-8 md:mt-16 md:grid-cols-5 md:pt-[90px]">
+        <div className="mt-12 grid grid-cols-1 items-start gap-8 lg:grid-cols-4 lg:pt-[90px] lg:gap-y-8">
           {spaces.map((s, i) => (
             <SpaceCard key={i} space={s} raised={i === 1 || i == 3} />
           ))}

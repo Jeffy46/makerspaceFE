@@ -21,6 +21,7 @@ const LERP_FACTOR = 0.06;
 // tune: raise to quicken pointer tracking
 const MOUSE_LERP = 1;
 
+const COLORS = ["#990000", "#001A3D"];
 type Dot = {
   restX: number;
   restY: number;
@@ -28,6 +29,7 @@ type Dot = {
   y: number;
   vx: number;
   vy: number;
+  color: number;
 };
 
 let MagneticDots = () => {
@@ -101,7 +103,15 @@ let MagneticDots = () => {
           if (prev.has(key)) {
             dots.push(prev.get(key)!);
           } else {
-            dots.push({ restX: rx, restY: ry, x: rx, y: ry, vx: 0, vy: 0 });
+            dots.push({
+              restX: rx,
+              restY: ry,
+              x: rx,
+              y: ry,
+              vx: 0,
+              vy: 0,
+              color: (r + c) % COLORS.length,
+            });
           }
         }
       }
@@ -133,10 +143,6 @@ let MagneticDots = () => {
 
       ctx.clearRect(0, 0, cw, ch);
 
-      const dotColor = "#001A3D";
-
-      ctx.fillStyle = dotColor;
-
       for (const d of dots) {
         if (hStr > 0.001) {
           const dx = d.x - mx;
@@ -162,6 +168,10 @@ let MagneticDots = () => {
 
         d.x += d.vx;
         d.y += d.vy;
+        ctx.fillStyle = COLORS[d.color];
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, DOT_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
 
         ctx.beginPath();
         ctx.arc(d.x, d.y, DOT_RADIUS, 0, Math.PI * 2);
