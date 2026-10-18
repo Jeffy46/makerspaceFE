@@ -19,30 +19,6 @@ const announcements: Announcement[] = [
     title: "Guest Speaker: Sustainable Making",
     body: "Join us in the Innovation Lab for a talk by alumni engineer Sarah Chen on recycled filaments.",
   },
-  {
-    id: 3,
-    date: "2025-10-20",
-    title: "Guest Speaker: Sustainable Making",
-    body: "Join us in the Innovation Lab for a talk by alumni engineer Sarah Chen on recycled filaments.",
-  },
-  {
-    id: 4,
-    date: "2025-10-20",
-    title: "Guest Speaker: Sustainable Making",
-    body: "Join us in the Innovation Lab for a talk by alumni engineer Sarah Chen on recycled filaments.",
-  },
-  {
-    id: 5,
-    date: "2025-10-20",
-    title: "Guest Speaker: Sustainable Making",
-    body: "Join us in the Innovation Lab for a talk by alumni engineer Sarah Chen on recycled filaments.",
-  },
-  {
-    id: 6,
-    date: "2025-10-20",
-    title: "Guest Speaker: Sustainable Making",
-    body: "Join us in the Innovation Lab for a talk by alumni engineer Sarah Chen on recycled filaments.",
-  },
 ];
 
 const formatDate = (iso: string) =>
@@ -65,10 +41,6 @@ let Announcements = () => {
             id="announcements-heading"
             className="text-3xl md:text-4xl font-bold text-sbu-navy-blue"
           >
-            <i
-              className="fa-solid fa-bullhorn mr-3 text-sbu-bright-red"
-              aria-hidden="true"
-            ></i>
             Announcements
           </h2>
         </div>
@@ -77,10 +49,6 @@ let Announcements = () => {
           role="status"
           className="mb-8 flex items-start border-l-4 border-yellow-400 bg-yellow-50 p-4 shadow-sm"
         >
-          <i
-            className="fa-solid fa-exclamation-circle mt-0.5 mr-3 text-yellow-600"
-            aria-hidden="true"
-          ></i>
           <p className="text-sm text-yellow-800">
             <span className="font-bold">Holiday Hours:</span> All labs will
             close at 4 PM this Friday for the holiday weekend.
@@ -91,7 +59,8 @@ let Announcements = () => {
           {announcements.map((a) => (
             <article
               key={a.id}
-              className="border-b-4 border-r-4 border-gray-200 bg-sbu-light-gray p-5 shadow-sm"
+              aria-labelledby={`announcement-title-${a.id}`}
+              className="border-b-4 border-r-4 border-gray-200 bg-sbu-light-gray p-5 shadow-sm focus:outline-none focus:ring-2 focus:ring-sbu-navy-blue"
             >
               <time dateTime={a.date} className="text-sm text-gray-500">
                 {formatDate(a.date)}

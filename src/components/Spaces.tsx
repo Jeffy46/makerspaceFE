@@ -4,7 +4,7 @@ let spaces: Space[] = [
   {
     name: "The Space",
     blurb:
-      "Located in Room 105 of the Engineering building, The Space is an innovation workshop where CEAS students can access fabrication tools, electronics, and open project hours after completing training.",
+      "Located in Room 105 of the Engineering building, The Space is a place where CEAS students can access fabrication tools, electronics, and open project hours after completing training.",
     space_poster_path:
       "https://uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/space-herrera-kukta-shurz-1.jpg",
     to: "https://www.stonybrook.edu/mach1/the-space/",
@@ -12,7 +12,7 @@ let spaces: Space[] = [
   {
     name: "The CAT Lab",
     blurb:
-      "Stony Brook University's CAT Lab is an interdisciplinary hub where all students can turn ideas into reality using 3D printers, laser cutters, textiles equipment, and VR stations.",
+      "Located in room C-2615 of the Melville Library, Stony Brook University's CAT Lab is an interdisciplinary hub where all students can turn ideas into reality using 3D printers, laser cutters, textiles equipment, and VR stations.",
     space_poster_path:
       "https://uploads.knightlab.com/storymapjs/43ef07b73bec477df1dee2dc1d73a88b/maker-spaces-on-campus/_images/IMG_9840.jpeg",
     to: "https://you.stonybrook.edu/catlab/",
@@ -102,26 +102,10 @@ let Spaces = () => {
           </h2>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 items-start gap-8 lg:grid-cols-4 lg:pt-[90px] lg:gap-y-8">
+        <div className="mt-12 grid grid-cols-1 items-start gap-8 lg:grid-cols-3 lg:pt-[90px] lg:gap-y-8">
           {spaces.map((s, i) => (
             <SpaceCard key={i} space={s} raised={i === 1 || i == 3} />
           ))}
-          <nav
-            aria-label="More ways to explore"
-            className="flex flex-col gap-2"
-          >
-            {ribbons.map((r) => (
-              <HashLink
-                key={r.label}
-                to={r.to}
-                target={r.label == "Map" ? "_blank" : "_self"}
-                rel="noopener noreferrer"
-                className={`block -skew-y-6 bg-gradient-to-r ${r.bg} px-6 py-5 text-center text-base md:text-base lg:text-2xl font-bold uppercase italic text-white transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-sbu-navy-blue flex justify-center`}
-              >
-                {r.label}
-              </HashLink>
-            ))}
-          </nav>
         </div>
       </div>
     </section>

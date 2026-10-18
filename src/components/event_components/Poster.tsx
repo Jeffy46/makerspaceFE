@@ -42,7 +42,7 @@ let Poster = ({
         className={`${notHomepage ? "bg-sbu-medium-gray" : "bg-sbu-light-gray"} flex h-full flex-col border border-b-4 border-r-4 border-gray-200 p-3 shadow-sm`}
       >
         <div
-          className={`flex items-center relative overflow-hidden bg-gray-100 md:aspect-auto md:min-h-0 md:flex-1`}
+          className={`flex items-center relative overflow-hidden bg-gray-100 md:min-h-0 md:flex-1`}
         >
           <div className="h-60 w-full flex items-center">
             <img
