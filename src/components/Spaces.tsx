@@ -28,23 +28,23 @@ let spaces: Space[] = [
   },
 ];
 
-let ribbons = [
-  {
-    label: "Map",
-    to: "https://www.youvisit.com/tour/map/stonybrook",
-    bg: "from-[#0a4fa8] to-[#1d78d6]",
-  },
-  {
-    label: "Workshops",
-    to: "/workshops#top",
-    bg: "from-[#0a6b7a] to-[#0aa0b5]",
-  },
-  {
-    label: "Top makers",
-    to: "/leaderboard#top",
-    bg: "from-[#7a0010] to-[#c4161c]",
-  },
-];
+// let ribbons = [
+//   {
+//     label: "Map",
+//     to: "https://www.youvisit.com/tour/map/stonybrook",
+//     bg: "from-[#0a4fa8] to-[#1d78d6]",
+//   },
+//   {
+//     label: "Workshops",
+//     to: "/workshops#top",
+//     bg: "from-[#0a6b7a] to-[#0aa0b5]",
+//   },
+//   {
+//     label: "Top makers",
+//     to: "/leaderboard#top",
+//     bg: "from-[#7a0010] to-[#c4161c]",
+//   },
+// ];
 
 let Arrow = () => (
   <svg
