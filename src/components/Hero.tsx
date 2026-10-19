@@ -6,11 +6,11 @@ let Hero = () => {
       <div className="container mx-auto flex">
         <div className="w-full md:w-2/3 xl:w-1/2 min-h-64 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 md:p-6 ml-auto shadow-lg bg-sbu-navy-blue">
           <div className="flex flex-col p-4">
-            <h1 className="text-4xl md:text-5xl font-bold">
-              <p className="text-white">Innovate</p>
-              <p className="text-white">Create</p>
-              <p className="text-sbu-bright-red">Make.</p>
-            </h1>
+            <div className="text-4xl md:text-5xl font-bold">
+              <h1 className="text-white">Innovate</h1>
+              <h1 className="text-white">Create</h1>
+              <h1 className="text-sbu-bright-red">Make.</h1>
+            </div>
             <p
               className="text-lg text-gray-600 dark:text-gray-300 mb-6"
               id="hero-text"

@@ -67,7 +67,7 @@ let SpaceCard = ({ space, raised }: { space: Space; raised: boolean }) => (
         {space.space_poster_path && (
           <img
             src={space.space_poster_path}
-            alt={space.name}
+            alt={`Picture of people inside ${space.name}`}
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none"
           />
@@ -102,11 +102,13 @@ let Spaces = () => {
           </h2>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 items-start gap-8 lg:grid-cols-3 lg:pt-[90px] lg:gap-y-8">
+        <ul className="mt-12 grid grid-cols-1 items-start gap-8 lg:grid-cols-3 lg:pt-[90px] lg:gap-y-8">
           {spaces.map((s, i) => (
-            <SpaceCard key={i} space={s} raised={i === 1 || i == 3} />
+            <li key={i}>
+              <SpaceCard key={i} space={s} raised={i === 1 || i == 3} />
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

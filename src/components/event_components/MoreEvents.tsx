@@ -32,29 +32,27 @@ let MoreEvents = () => {
 
     fetchData();
   }, []);
-  let placeholders: (Event | undefined)[] = [
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-  ];
+  let placeholders: (Event | undefined)[] = [undefined, undefined, undefined];
   let upcomingToShow = loading ? placeholders : otherEvents;
   let pastToShow = loading ? placeholders : pastEvents;
   return (
     <section className="bg-white/20 px-6 md:px-8 md:pb-12 pt-0 pb-8">
-      
-        <div className="container mx-auto">
-        {(otherEvents.length > 0) && (<h3
-          className="text-2xl font-bold text-sbu-navy-blue p-2 pl-4 bg-sbu-medium-gray mb-8"
-          id="other-upcoming-events-heading"
-        >
-          Other Upcoming Events
-        </h3>
+      <div className="container mx-auto">
+        {otherEvents.length > 0 && (
+          <h2
+            className="text-2xl font-bold text-sbu-navy-blue p-2 pl-4 bg-sbu-light-gray mb-8"
+            id="other-upcoming-events-heading"
+          >
+            Other Upcoming Events
+          </h2>
         )}
         <section aria-labelledby="other-upcoming-Events-heading">
           {(loading || otherEvents.length > 0) && (
             <div className="mb-12 ">
-              <div className="grid grid-cols-1 gap-5  lg:grid-cols-3">
+              <div
+                id="other-upcoming-Events-heading"
+                className="grid grid-cols-1 gap-5  lg:grid-cols-3"
+              >
                 {upcomingToShow.map((e, i) => (
                   <Poster
                     key={e?.event_id ?? i}
@@ -69,15 +67,20 @@ let MoreEvents = () => {
         </section>
 
         <section aria-labelledby="past-Events-heading">
-          {(pastEvents.length > 0) && (<h3
-            className="text-2xl font-bold p-2 pl-4 text-sbu-navy-blue bg-sbu-medium-gray mb-8"
-            id="past-events-heading"
-          >
-            Past Events
-          </h3>)}
+          {pastEvents.length > 0 && (
+            <h2
+              className="text-2xl font-bold p-2 pl-4 text-sbu-navy-blue bg-sbu-light-gray mb-8"
+              id="past-events-heading"
+            >
+              Past Events
+            </h2>
+          )}
           {(loading || pastEvents.length > 0) && (
             <div className="">
-              <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+              <div
+                id="past-Events-heading"
+                className="grid grid-cols-1 gap-5 lg:grid-cols-3"
+              >
                 {pastToShow.map((e, i) => (
                   <Poster
                     key={e?.event_id ?? i}

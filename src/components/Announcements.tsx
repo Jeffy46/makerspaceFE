@@ -62,13 +62,21 @@ let Announcements = () => {
               aria-labelledby={`announcement-title-${a.id}`}
               className="border-b-4 border-r-4 border-gray-200 bg-sbu-light-gray p-5 shadow-sm focus:outline-none focus:ring-2 focus:ring-sbu-navy-blue"
             >
-              <time dateTime={a.date} className="text-sm text-gray-500">
+              <time
+                dateTime={a.date}
+                className="text-sm text-gray-500 font-bold text-sbu-navy-blue"
+              >
                 {formatDate(a.date)}
               </time>
-              <h3 className="mt-1 text-lg font-bold text-sbu-navy-blue">
+              <h3
+                id={`announcement-title-${a.id}`}
+                className="mt-1 text-lg font-bold text-sbu-navy-blue"
+              >
                 {a.title}
               </h3>
-              <p className="mt-2 text-gray-600">{a.body}</p>
+              <p className="mt-2 text-gray-600 font-bold text-sbu-navy-blue">
+                {a.body}
+              </p>
             </article>
           ))}
         </div>

@@ -5,11 +5,16 @@ import { HashLink } from "react-router-hash-link";
 let Navbar = () => {
   let [isMenuOpen, setIsMenuOpen] = useState(false);
   let closeMenu = () => setIsMenuOpen(false);
+  const navItems = [
+    { id: 2, label: "Spaces", path: "/#spaces" },
+    { id: 3, label: "Announcments", path: "/#announcements" },
+    { id: 4, label: "Workshops", path: "/workshops#top" },
+  ];
   return (
     // Navigation
     <nav className="bg-sbu-red text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <HashLink to="/">
+        <HashLink to="/#top">   
           <div className="flex items-center space-x-2">
             <FontAwesomeIcon icon={faScrewdriverWrench} className="text-2xl" />
 
@@ -18,30 +23,20 @@ let Navbar = () => {
             </span>
           </div>
         </HashLink>
+        <ul className="hidden md:flex text-sm font-medium">
+          {navItems.map((item) => (
+            <li key={item.id}>
+              <HashLink
+                className="hover:text-gray-200 transition pl-20"
+                smooth
+                to={item.path}
+              >
+                {item.label}
+              </HashLink>
+            </li>
+          ))}
+        </ul>
 
-        <div className="hidden md:flex space-x-8 text-sm font-medium">
-          <HashLink
-            className="hover:text-gray-200 transition"
-            smooth
-            to={"/#spaces"}
-          >
-            Spaces
-          </HashLink>
-          <HashLink
-            className="hover:text-gray-200 transition"
-            smooth
-            to={"/#announcements"}
-          >
-            Announcements
-          </HashLink>
-
-          <HashLink
-            className="hover:text-gray-200 transition"
-            to={"/workshops"}
-          >
-            Workshops
-          </HashLink>
-        </div>
         {/* Mobile Menu Button */}
         <button
           type="button"
@@ -70,36 +65,23 @@ let Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div
+        <ul
           id="mobile-menu"
           className="md:hidden flex flex-col border-t border-white/20 px-6 pb-3 pt-1 text-base font-medium"
         >
-          <HashLink
-            className="block py-3 hover:text-gray-200 transition"
-            smooth
-            to="/#spaces"
-            onClick={closeMenu}
-          >
-            Spaces
-          </HashLink>
-
-          <HashLink
-            className="block py-3 hover:text-gray-200 transition"
-            smooth
-            to="/#announcements"
-            onClick={closeMenu}
-          >
-            Announcements
-          </HashLink>
-
-          <HashLink
-            className="block py-3 hover:text-gray-200 transition"
-            to="/workshops"
-            onClick={closeMenu}
-          >
-            Workshops
-          </HashLink>
-        </div>
+          {navItems.map((item) => (
+            <li key={item.id}>
+              <HashLink
+                className="block py-3 hover:text-gray-200 transition"
+                smooth
+                to={item.path}
+                onClick={closeMenu}
+              >
+                {item.label}
+              </HashLink>
+            </li>
+          ))}
+        </ul>
       )}
     </nav>
   );

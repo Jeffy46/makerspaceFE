@@ -43,15 +43,15 @@ let Events = () => {
     >
       <div className="container mx-auto">
         <div
-          className={`${notHomepage ? "bg-sbu-medium-gray" : "bg-sbu-light-gray"} flex items-end justify-between gap-4 border-l-0 border-b-4 border-r-4 border-gray-200 mb-8 p-1 flex-col sm:flex-row`}
+          className={`${notHomepage ? "bg-sbu-light-gray" : "bg-sbu-light-gray"} flex items-end justify-between gap-4 border-l-0 border-b-4 border-r-4 border-gray-200 mb-8 p-1 flex-col sm:flex-row`}
         >
           <div>
-            <h2
+            <h1
               id="Events-heading"
               className={`${notHomepage ? "text-sbu-navy-blue" : "text-sbu-navy-blue"} text-3xl md:text-4xl p-2 font-bold`}
             >
               Upcoming Events
-            </h2>
+            </h1>
             <p
               className={`${notHomepage ? "text-sbu-navy-blue" : "text-sbu-navy-blue"} p-2 mt-1`}
             >

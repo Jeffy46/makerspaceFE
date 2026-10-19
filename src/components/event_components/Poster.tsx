@@ -39,7 +39,7 @@ let Poster = ({
       className="group block h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-sbu-navy-blue"
     >
       <figure
-        className={`${notHomepage ? "bg-sbu-medium-gray" : "bg-sbu-light-gray"} flex h-full flex-col border border-b-4 border-r-4 border-gray-200 p-3 shadow-sm`}
+        className={`${notHomepage ? "bg-sbu-light-gray" : "bg-sbu-light-gray"} flex h-full flex-col border border-b-4 border-r-4 border-gray-200 p-3 shadow-sm`}
       >
         <div
           className={`flex items-center relative overflow-hidden bg-gray-100 md:min-h-0 md:flex-1`}
@@ -55,7 +55,11 @@ let Poster = ({
                 ready ? "object-cover" : "object-scale-down"
               }`}
               src={ready ? e.event_poster_path : loadingGif}
-              alt={ready ? `${e.title} poster` : ""}
+              alt={
+                ready
+                  ? `Workshop flyer for event titled ${e.title} poster image`
+                  : ""
+              }
               loading={featured ? "eager" : "lazy"}
             />
           </div>
