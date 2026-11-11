@@ -1,11 +1,11 @@
-import { MoreWorkshops, Workshops } from "../components";
+import { MoreEvents, Events } from "../components";
 
 let WorkshopPage = () => {
   return (
-    <>
-      <Workshops></Workshops>
-      <MoreWorkshops></MoreWorkshops>
-    </>
+    <main>
+      <Events></Events>
+      <MoreEvents></MoreEvents>
+    </main>
   );
 };
 export default WorkshopPage;

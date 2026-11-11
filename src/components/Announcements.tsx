@@ -5,7 +5,6 @@ type Announcement = {
   body: string;
 };
 
-// Placeholder content - replace with real data (or fetch it).
 const announcements: Announcement[] = [
   {
     id: 1,
@@ -43,16 +42,6 @@ let Announcements = () => {
           >
             Announcements
           </h2>
-        </div>
-
-        <div
-          role="status"
-          className="mb-8 flex items-start border-l-4 border-yellow-400 bg-yellow-50 p-4 shadow-sm"
-        >
-          <p className="text-sm text-yellow-800">
-            <span className="font-bold">Holiday Hours:</span> All labs will
-            close at 4 PM this Friday for the holiday weekend.
-          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

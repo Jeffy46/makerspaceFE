@@ -9,12 +9,12 @@ let Navbar = () => {
     { id: 2, label: "Spaces", path: "/#spaces" },
     { id: 3, label: "Announcments", path: "/#announcements" },
     { id: 4, label: "Workshops", path: "/workshops#top" },
+    { id: 5, label: "Leaderboard", path: "/leaderboard#top" },
   ];
   return (
-    // Navigation
     <nav className="bg-sbu-red text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <HashLink to="/#top">   
+        <HashLink to="/#top">
           <div className="flex items-center space-x-2">
             <FontAwesomeIcon icon={faScrewdriverWrench} className="text-2xl" />
 

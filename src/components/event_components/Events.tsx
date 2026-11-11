@@ -10,9 +10,7 @@ let Events = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/events`,
-        );
+        const response = await fetch("api/events");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
@@ -21,7 +19,7 @@ let Events = () => {
         setEvents(result);
       } catch (err) {
         console.error("Error occurred:", err);
-        console.log(`${import.meta.env.VITE_BACKEND_URL}/events`);
+        console.log("api/events");
       } finally {
         setLoading(false);
       }
