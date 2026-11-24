@@ -55,7 +55,9 @@ const useAttendeePairs = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const response = await fetch("/api/attendees");
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/attendees`,
+        );
         if (!response.ok) throw new Error("Network response was not ok");
         const attendees = (await response.json()) as EventAttendee[];
         setPairs(getAttendeePairs(attendees));
