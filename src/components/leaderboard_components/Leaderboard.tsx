@@ -20,32 +20,37 @@ const SPIRAL_STEP = MIN_RADIUS; // arc length between candidate positions
 const SPIRAL_BACKOFF = 40; // arc length to rewind before each placement
 const GRID_CELL = 48; // spatial-hash cell size used while packing
 
+// Organic shape config
+const BLOB_POINTS = 20; // segments per bubble contour (smooth when zoomed in)
+const BLOB_MIN_SCREEN_PX = 8; // below this radius on screen, draw fast circle
+
 // Camera
-const MIN_LABEL_PX = 8;
+const MIN_LABEL_PX = 11; // cull tiny unreadable labels early for fast canvas draws
 const FIT_PADDING = 0.9;
 const BUTTON_ZOOM = 1.4;
-const WHEEL_ZOOM_IN = 1.08;
-const WHEEL_ZOOM_OUT = 0.92;
+const WHEEL_ZOOM_SPEED = 0.0018; // exponential zoom sensitivity per deltaY pixel
+const CAMERA_LERP = 0.22; // smoothing factor per 60Hz frame for zoom/pan
+const PAN_FRICTION = 0.9; // velocity retention per 60Hz frame after release
 const FOCUS_ZOOM_LEVEL = 3.2; // Minimum magnification when finding a person
 const FOCUS_SCREEN_RADIUS = 60; // Target on-screen radius (px) of a found bubble
 const MAX_ZOOM = 40;
 const MIN_ZOOM_VS_FIT = 0.5;
 
 // Physics (custom solver, all bubbles simulated)
-const AIR_FRICTION = 0.04;
+const AIR_FRICTION = 0.015;
 const RESTITUTION = 0.7;
 const RESTING_SPEED = 0.25; // slower impacts don't bounce (stops jitter in piles)
 const POS_CORRECTION = 0.8;
 const PHYS_SUBSTEPS = 3;
 const PHYS_ITERATIONS = 2;
-const MAX_SPEED = 16; // per frame; substeps keep this below a bubble's diameter
+const MAX_SPEED = 18; // per 60Hz frame; substeps keep this below a bubble's diameter
 const PHYS_CELL = 32; // grid cell size for collision lookups
 const MAX_GRID_DIM = 300; // cap on cells per axis if bubbles get flung far away
-const CENTER_PULL_EDGE = 0.02; // inward acceleration at the cluster's outer edge
-const DRAG_STIFFNESS = 0.12;
-const DRAG_DAMPING = 0.35;
+const CENTER_PULL_EDGE = 0.08; // inward acceleration at the cluster's outer edge
+const DRAG_STIFFNESS = 0.22; // tighter coupling to cursor
+const DRAG_DAMPING = 0.42;
 const REST_SPEED = 0.03; // below this the world counts as calm
-const REST_FRAMES = 30; // calm frames before the simulation parks itself
+const REST_FRAMES = 60; // calm frames before the simulation parks itself
 const MAX_FREE_FRAMES = 900; // hard stop after release, even if never fully calm
 
 const FONT_FAMILY = "ui-sans-serif, system-ui, sans-serif";
@@ -71,23 +76,23 @@ const COLORS = {
 const HIGHLIGHT = [
   {
     rgb: "253,224,71",
-    stroke: "rgba(253,224,71,0.9)",
-    glow: "rgba(251,191,36,0.65)",
+    stroke: "rgba(253,224,71,0.95)",
+    glow: "rgba(251,191,36,0.35)",
   },
   {
     rgb: "226,232,240",
-    stroke: "rgba(226,232,240,0.9)",
-    glow: "rgba(241,245,249,0.5)",
+    stroke: "rgba(226,232,240,0.95)",
+    glow: "rgba(241,245,249,0.3)",
   },
   {
     rgb: "253,186,116",
-    stroke: "rgba(253,186,116,0.9)",
-    glow: "rgba(251,146,60,0.5)",
+    stroke: "rgba(253,186,116,0.95)",
+    glow: "rgba(251,146,60,0.3)",
   },
   {
     rgb: "255,255,255",
     stroke: "rgb(255,255,255)",
-    glow: "rgba(255,255,255,0.9)",
+    glow: "rgba(255,255,255,0.35)",
   },
 ] as const;
 
@@ -97,7 +102,7 @@ const RIPPLE_COUNT = 2; // rings in flight at once
 const RIPPLE_MIN_REACH_PX = 40; // how far a ripple spreads on screen, at least
 
 /* -------------------------------------------------------------------------- */
-/*  Colors                                                                    */
+/*  Colors & Shape Helpers                                                    */
 /* -------------------------------------------------------------------------- */
 
 const hexToRgb = (hex: string) => {
@@ -112,6 +117,54 @@ const mix = (from: string, to: string, t: number) => {
   return `rgb(${r},${g},${bl})`;
 };
 
+/** Deterministic 0..1 hash so each attendee gets a consistent organic shape. */
+const hashString = (str: string) => {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) / 4294967295;
+};
+
+/**
+ * Traces a slightly irregular organic closed contour around (x, y) with mean
+ * radius `r`. Falls back to a standard arc when tiny on screen for speed.
+ */
+function traceOrganicBubble(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  r: number,
+  seed: number,
+  k: number,
+) {
+  if (r * k < BLOB_MIN_SCREEN_PX) {
+    ctx.arc(x, y, r, 0, TAU);
+    return;
+  }
+
+  const phase1 = seed * TAU;
+  const phase2 = seed * TAU * 2.7;
+  const amp1 = 0.045;
+  const amp2 = 0.03;
+
+  for (let i = 0; i <= BLOB_POINTS; i++) {
+    const angle = (i / BLOB_POINTS) * TAU;
+    const wobble =
+      1 +
+      amp1 * Math.sin(angle * 2 + phase1) +
+      amp2 * Math.cos(angle * 3 + phase2);
+    const rr = r * wobble;
+    const px = x + Math.cos(angle) * rr;
+    const py = y + Math.sin(angle) * rr;
+
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Layout                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -122,9 +175,11 @@ type Bubble = {
   nameLower: string;
   label: string;
   points: number;
+  pointsLabel: string;
   rank: number | null;
   color: string;
   r: number;
+  seed: number;
   fontSize: number;
   x: number; // mutated in place by physics
   y: number;
@@ -155,13 +210,16 @@ function createBubbles(sorted: Pair[]): Bubble[] {
       nameLower: name.toLowerCase(),
       label: shortName(name),
       points,
+      pointsLabel: String(points),
       rank: tier === -1 ? null : tier + 1,
       color:
         tier === -1
           ? mix(COLORS.bubbleLow, COLORS.bubbleHigh, Math.sqrt(points / max))
           : COLORS.podium[tier],
       r,
-      fontSize: r * 0.2,
+      seed: hashString(email),
+      // Quantize fontSize to 0.25px increments so ctx.font batches cleanly
+      fontSize: Math.round(r * 0.2 * 4) / 4,
       x: 0,
       y: 0,
     };
@@ -258,7 +316,7 @@ function layoutBubbles(pairs: Pair[]): Bubble[] {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Camera (pan and zoom)                                                     */
+/*  Camera (pan, zoom, inertia, and smooth interpolation)                     */
 /* -------------------------------------------------------------------------- */
 
 type View = { x: number; y: number; k: number };
@@ -276,111 +334,187 @@ function useCamera(
   requestDraw: () => void,
 ) {
   const viewRef = useRef<View>({ x: 0, y: 0, k: 1 });
+  const targetRef = useRef<View>({ x: 0, y: 0, k: 1 });
+  const velRef = useRef({ vx: 0, vy: 0 });
   const limitsRef = useRef({ min: 0.01, max: MAX_ZOOM });
   const animRef = useRef(0);
 
   const cancelAnim = useCallback(() => {
     cancelAnimationFrame(animRef.current);
     animRef.current = 0;
+    velRef.current = { vx: 0, vy: 0 };
+    targetRef.current = { ...viewRef.current };
   }, []);
 
-  const setView = useCallback(
+  /** Immediately snap both current and target camera views (used during active drag). */
+  const setViewImmediate = useCallback(
     (x: number, y: number, k: number) => {
+      cancelAnim();
       viewRef.current = { x, y, k };
+      targetRef.current = { x, y, k };
       requestDraw();
     },
-    [requestDraw],
+    [cancelAnim, requestDraw],
   );
 
-  /** Zoom by `factor`, keeping the point (ox, oy) — relative to the canvas centre — fixed. */
+  /** Start or continue the camera spring/inertia loop toward targetRef. */
+  const wakeCamera = useCallback(() => {
+    if (animRef.current) return;
+    let lastTime = performance.now();
+
+    const step = (now: number) => {
+      const dt = Math.min((now - lastTime) / 16.667, 2.5);
+      lastTime = now;
+
+      const cur = viewRef.current;
+      const tgt = targetRef.current;
+      const vel = velRef.current;
+
+      // Apply pan inertia to target
+      if (Math.abs(vel.vx) > 0.05 || Math.abs(vel.vy) > 0.05) {
+        tgt.x += vel.vx * dt;
+        tgt.y += vel.vy * dt;
+        const decay = Math.pow(PAN_FRICTION, dt);
+        vel.vx *= decay;
+        vel.vy *= decay;
+      } else {
+        vel.vx = 0;
+        vel.vy = 0;
+      }
+
+      // Frame-rate independent exponential smoothing toward target
+      const alpha = prefersReducedMotion()
+        ? 1
+        : 1 - Math.pow(1 - CAMERA_LERP, dt);
+
+      cur.x += (tgt.x - cur.x) * alpha;
+      cur.y += (tgt.y - cur.y) * alpha;
+      cur.k += (tgt.k - cur.k) * alpha;
+
+      const settled =
+        Math.abs(tgt.x - cur.x) < 0.05 &&
+        Math.abs(tgt.y - cur.y) < 0.05 &&
+        Math.abs(tgt.k - cur.k) < 1e-4 &&
+        vel.vx === 0 &&
+        vel.vy === 0;
+
+      if (settled) {
+        cur.x = tgt.x;
+        cur.y = tgt.y;
+        cur.k = tgt.k;
+        animRef.current = 0;
+      } else {
+        animRef.current = requestAnimationFrame(step);
+      }
+
+      requestDraw();
+    };
+
+    animRef.current = requestAnimationFrame(step);
+  }, [requestDraw]);
+
+  /** Apply pan momentum when pointer is released. */
+  const throwPan = useCallback(
+    (vx: number, vy: number) => {
+      velRef.current = { vx, vy };
+      targetRef.current = { ...viewRef.current };
+      wakeCamera();
+    },
+    [wakeCamera],
+  );
+
+  /** Smoothly zoom by `factor` around (ox, oy) relative to canvas center. */
   const zoomAt = useCallback(
     (factor: number, ox = 0, oy = 0) => {
-      cancelAnim();
-      const { x, y, k } = viewRef.current;
+      velRef.current = { vx: 0, vy: 0 };
+      const { x, y, k } = targetRef.current;
       const nextK = clamp(
         k * factor,
         limitsRef.current.min,
         limitsRef.current.max,
       );
       const f = nextK / k;
-      setView(ox - (ox - x) * f, oy - (oy - y) * f, nextK);
+      targetRef.current = {
+        x: ox - (ox - x) * f,
+        y: oy - (oy - y) * f,
+        k: nextK,
+      };
+      wakeCamera();
     },
-    [cancelAnim, setView],
+    [wakeCamera],
   );
 
   /** Smoothly zoom into and centre a world coordinate. */
   const zoomTo = useCallback(
     (worldX: number, worldY: number, targetK: number) => {
-      cancelAnim();
-      const { x: startX, y: startY, k: startK } = viewRef.current;
+      velRef.current = { vx: 0, vy: 0 };
       const endK = clamp(targetK, limitsRef.current.min, limitsRef.current.max);
-      const endX = -worldX * endK;
-      const endY = -worldY * endK;
-      const duration = 650;
-      const startTime = performance.now();
-
-      const step = (now: number) => {
-        const t = Math.min((now - startTime) / duration, 1);
-        const e = 1 - Math.pow(1 - t, 3); // easeOutCubic
-        setView(
-          startX + (endX - startX) * e,
-          startY + (endY - startY) * e,
-          startK + (endK - startK) * e,
-        );
-        animRef.current = t < 1 ? requestAnimationFrame(step) : 0;
+      targetRef.current = {
+        x: -worldX * endK,
+        y: -worldY * endK,
+        k: endK,
       };
-      animRef.current = requestAnimationFrame(step);
+      wakeCamera();
     },
-    [cancelAnim, setView],
+    [wakeCamera],
   );
 
-  const fit = useCallback(() => {
-    const el = containerRef.current;
-    if (!el || bubbles.length === 0) return;
-    const { width, height } = el.getBoundingClientRect();
-    if (!width || !height) return;
+  const fit = useCallback(
+    (animate = true) => {
+      const el = containerRef.current;
+      if (!el || bubbles.length === 0) return;
+      const { width, height } = el.getBoundingClientRect();
+      if (!width || !height) return;
 
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minY = Infinity;
-    let maxY = -Infinity;
-    for (const b of bubbles) {
-      if (b.x - b.r < minX) minX = b.x - b.r;
-      if (b.x + b.r > maxX) maxX = b.x + b.r;
-      if (b.y - b.r < minY) minY = b.y - b.r;
-      if (b.y + b.r > maxY) maxY = b.y + b.r;
-    }
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let minY = Infinity;
+      let maxY = -Infinity;
+      for (const b of bubbles) {
+        if (b.x - b.r < minX) minX = b.x - b.r;
+        if (b.x + b.r > maxX) maxX = b.x + b.r;
+        if (b.y - b.r < minY) minY = b.y - b.r;
+        if (b.y + b.r > maxY) maxY = b.y + b.r;
+      }
 
-    const k =
-      Math.min(width / (maxX - minX), height / (maxY - minY)) * FIT_PADDING;
-    limitsRef.current = { min: k * MIN_ZOOM_VS_FIT, max: MAX_ZOOM };
-    cancelAnim();
-    setView(-((minX + maxX) / 2) * k, -((minY + maxY) / 2) * k, k);
-  }, [bubbles, containerRef, cancelAnim, setView]);
+      const k =
+        Math.min(width / (maxX - minX), height / (maxY - minY)) * FIT_PADDING;
+      limitsRef.current = { min: k * MIN_ZOOM_VS_FIT, max: MAX_ZOOM };
+      const cx = -((minX + maxX) / 2) * k;
+      const cy = -((minY + maxY) / 2) * k;
+
+      if (animate) {
+        velRef.current = { vx: 0, vy: 0 };
+        targetRef.current = { x: cx, y: cy, k };
+        wakeCamera();
+      } else {
+        setViewImmediate(cx, cy, k);
+      }
+    },
+    [bubbles, containerRef, wakeCamera, setViewImmediate],
+  );
 
   useEffect(() => {
-    fit();
+    fit(false);
   }, [fit]);
 
   useEffect(() => cancelAnim, [cancelAnim]);
 
-  return { viewRef, zoomAt, zoomTo, fit, setView, cancelAnim };
+  return {
+    viewRef,
+    zoomAt,
+    zoomTo,
+    fit,
+    setViewImmediate,
+    throwPan,
+    cancelAnim,
+  };
 }
 
 /* -------------------------------------------------------------------------- */
 /*  Physics                                                                   */
 /* -------------------------------------------------------------------------- */
 
-/**
- * A small circle-physics engine built for tens of thousands of bodies.
- *
- * Every bubble is simulated every frame (drift, collisions, bounce, drag), but
- * the expensive part of a physics engine - finding who touches whom - uses a
- * uniform grid rebuilt from typed arrays each step, so each bubble only tests a
- * handful of neighbours. Bodies are registered in every cell their bounding box
- * covers, so big and small bubbles share one grid. The simulation parks itself
- * once everything has come to rest and wakes up when you interact.
- */
 class BubbleSim {
   private readonly n: number;
   private readonly x: Float64Array;
@@ -428,11 +562,9 @@ class BubbleSim {
       this.x[i] = b.x;
       this.y[i] = b.y;
       this.r[i] = b.r;
-      // Mass scales with area, like Matter's circles
       this.invM[i] = (MIN_RADIUS * MIN_RADIUS) / (b.r * b.r);
       reach = Math.max(reach, Math.hypot(b.x, b.y) + b.r);
     }
-    // Pull is normalised to the cluster size so a 10k pile isn't crushed
     this.pullK = CENTER_PULL_EDGE / reach;
   }
 
@@ -464,11 +596,14 @@ class BubbleSim {
     }
   }
 
-  /** Advance one frame. Returns false once the world has come to rest. */
-  step(): boolean {
-    const dt = 1 / PHYS_SUBSTEPS;
+  /**
+   * Advance one frame using normalized delta-time (`dtScale = 1.0` at 60fps).
+   * Returns false once the world has come to rest.
+   */
+  step(dtScale: number): boolean {
+    const subDt = dtScale / PHYS_SUBSTEPS;
     for (let s = 0; s < PHYS_SUBSTEPS; s++) {
-      this.integrate(dt);
+      this.integrate(subDt);
       this.buildGrid();
       for (let it = 0; it < PHYS_ITERATIONS; it++) this.solve();
     }
@@ -485,13 +620,13 @@ class BubbleSim {
       if (sq > maxSq) maxSq = sq;
     }
     this.calmFrames = maxSq < REST_SPEED * REST_SPEED ? this.calmFrames + 1 : 0;
-    this.freeFrames++;
+    this.freeFrames += dtScale;
     return this.calmFrames < REST_FRAMES && this.freeFrames < MAX_FREE_FRAMES;
   }
 
   private integrate(dt: number) {
     const { n, x, y, vx, vy, pullK } = this;
-    const damp = 1 - AIR_FRICTION * dt;
+    const damp = Math.pow(1 - AIR_FRICTION, dt);
     const maxSq = MAX_SPEED * MAX_SPEED;
 
     for (let i = 0; i < n; i++) {
@@ -604,7 +739,6 @@ class BubbleSim {
           for (let b = a + 1; b < end; b++) {
             const j = items[b];
 
-            // A pair can share several cells; handle it in exactly one of them
             if (cx !== Math.max(cx0[i], cx0[j])) continue;
             if (cy !== Math.max(cy0[i], cy0[j])) continue;
 
@@ -628,14 +762,12 @@ class BubbleSim {
             const wj = invM[j];
             const ws = wi + wj;
 
-            // Push apart, lighter bubbles move more
             const corr = (overlap * POS_CORRECTION) / ws;
             x[i] -= dx * corr * wi;
             y[i] -= dy * corr * wi;
             x[j] += dx * corr * wj;
             y[j] += dy * corr * wj;
 
-            // Bounce along the contact normal
             const rvn = (vx[j] - vx[i]) * dx + (vy[j] - vy[i]) * dy;
             if (rvn < 0) {
               const e = rvn < -RESTING_SPEED ? RESTITUTION : 0;
@@ -662,16 +794,27 @@ function useBubblePhysics(bubbles: Bubble[], requestDraw: () => void) {
     simRef.current = sim;
 
     let raf = 0;
-    const loop = () => {
+    let lastTime = performance.now();
+
+    const loop = (now: number) => {
       raf = 0;
-      const keepGoing = sim.step();
+      // Normalize elapsed time to a 60fps baseline (clamped to 2 frames max)
+      const dtScale = clamp((now - lastTime) / 16.667, 0.1, 2.0);
+      lastTime = now;
+
+      const keepGoing = sim.step(dtScale);
       sim.writeBack(bubbles);
       requestDraw();
       if (keepGoing) raf = requestAnimationFrame(loop);
     };
+
     const wake = () => {
-      if (!raf) raf = requestAnimationFrame(loop);
+      if (!raf) {
+        lastTime = performance.now();
+        raf = requestAnimationFrame(loop);
+      }
     };
+
     wakeRef.current = wake;
     wake();
 
@@ -734,6 +877,7 @@ const BubbleChart = ({
   const highlightIdxRef = useRef(-1);
   const modeRef = useRef<"none" | "pan" | "drag">("none");
   const panStartRef = useRef({ x: 0, y: 0 });
+  const panTrackRef = useRef({ x: 0, y: 0, t: 0, vx: 0, vy: 0 });
   const handledFocusRef = useRef<FocusRequest | null>(null);
 
   const [grabbing, setGrabbing] = useState(false);
@@ -752,16 +896,21 @@ const BubbleChart = ({
   useEffect(
     () => () => {
       cancelAnimationFrame(rafRef.current);
-      rafRef.current = 0; // otherwise requestDraw thinks a frame is still queued
+      rafRef.current = 0;
     },
     [],
   );
 
-  const { viewRef, zoomAt, zoomTo, fit, setView, cancelAnim } = useCamera(
-    bubbles,
-    containerRef,
-    requestDraw,
-  );
+  const {
+    viewRef,
+    zoomAt,
+    zoomTo,
+    fit,
+    setViewImmediate,
+    throwPan,
+    cancelAnim,
+  } = useCamera(bubbles, containerRef, requestDraw);
+
   const { startDrag, moveDrag, endDrag } = useBubblePhysics(
     bubbles,
     requestDraw,
@@ -817,7 +966,7 @@ const BubbleChart = ({
     const right = (w / 2 - x) / k;
     const top = (-h / 2 - y) / k;
     const bottom = (h / 2 - y) / k;
-    const minVisibleR = 0.5 / k; // skip bubbles under half a pixel
+    const minVisibleR = 0.5 / k;
 
     const labelled: number[] = [];
     let lastColor = "";
@@ -833,21 +982,36 @@ const BubbleChart = ({
         lastColor = b.color;
       }
       ctx.beginPath();
-      ctx.arc(b.x, b.y, b.r, 0, TAU);
+      traceOrganicBubble(ctx, b.x, b.y, b.r, b.seed, k);
       ctx.fill();
 
-      if (b.fontSize * k > MIN_LABEL_PX) labelled.push(i);
+      if (b.fontSize * k >= MIN_LABEL_PX) labelled.push(i);
     }
 
+    // Batch text draws by font size to minimize expensive ctx.font re-parses
     if (labelled.length > 0) {
+      labelled.sort((a, b) => bubbles[b].fontSize - bubbles[a].fontSize);
       ctx.fillStyle = COLORS.label;
       ctx.textAlign = "center";
+
+      let lastFontSize = -1;
       for (const i of labelled) {
         const b = bubbles[i];
-        ctx.font = `600 ${b.fontSize}px ${FONT_FAMILY}`;
+        if (b.fontSize !== lastFontSize) {
+          ctx.font = `600 ${b.fontSize}px ${FONT_FAMILY}`;
+          lastFontSize = b.fontSize;
+        }
         ctx.fillText(b.label, b.x, b.y - 0.1 * b.fontSize);
-        ctx.font = `400 ${b.fontSize}px ${FONT_FAMILY}`;
-        ctx.fillText(String(b.points), b.x, b.y + 1.1 * b.fontSize);
+      }
+
+      lastFontSize = -1;
+      for (const i of labelled) {
+        const b = bubbles[i];
+        if (b.fontSize !== lastFontSize) {
+          ctx.font = `400 ${b.fontSize}px ${FONT_FAMILY}`;
+          lastFontSize = b.fontSize;
+        }
+        ctx.fillText(b.pointsLabel, b.x, b.y + 1.1 * b.fontSize);
       }
     }
 
@@ -857,7 +1021,7 @@ const BubbleChart = ({
       ctx.lineWidth = 2 / k;
       ctx.strokeStyle = "rgba(255,255,255,0.7)";
       ctx.beginPath();
-      ctx.arc(b.x, b.y, b.r, 0, TAU);
+      traceOrganicBubble(ctx, b.x, b.y, b.r, b.seed, k);
       ctx.stroke();
     }
 
@@ -865,32 +1029,34 @@ const BubbleChart = ({
     if (found >= 0) {
       const b = bubbles[found];
       const style = HIGHLIGHT[b.rank === null ? 3 : b.rank - 1];
-      // Halo keeps a found bubble visible even when it's a speck on screen
       const haloR = Math.max(b.r + 2 / k, 10 / k);
-      // Ripples: rings that expand from the halo and fade out
+
       if (!prefersReducedMotion()) {
         const reach = Math.max(b.r * 1.2, RIPPLE_MIN_REACH_PX / k);
         const now = performance.now();
         ctx.lineWidth = 3 / k;
         for (let n = 0; n < RIPPLE_COUNT; n++) {
-          const phase = (now / RIPPLE_PERIOD_MS + n / RIPPLE_COUNT) % 1; // 0 -> 1
+          const phase = (now / RIPPLE_PERIOD_MS + n / RIPPLE_COUNT) % 1;
           const alpha = Math.pow(1 - phase, 1.5) * 0.8;
           ctx.strokeStyle = `rgba(${style.rgb},${alpha.toFixed(3)})`;
           ctx.beginPath();
-          ctx.arc(b.x, b.y, haloR + phase * reach, 0, TAU);
+          traceOrganicBubble(ctx, b.x, b.y, haloR + phase * reach, b.seed, k);
           ctx.stroke();
         }
       }
 
-      ctx.save();
-      ctx.lineWidth = 4 / k;
-      ctx.strokeStyle = style.stroke;
-      ctx.shadowColor = style.glow;
-      ctx.shadowBlur = 12 * dpr;
+      // Fast multi-ring glow (avoids expensive CPU/GPU ctx.shadowBlur)
+      ctx.lineWidth = 10 / k;
+      ctx.strokeStyle = style.glow;
       ctx.beginPath();
-      ctx.arc(b.x, b.y, haloR, 0, TAU);
+      traceOrganicBubble(ctx, b.x, b.y, haloR, b.seed, k);
       ctx.stroke();
-      ctx.restore();
+
+      ctx.lineWidth = 3.5 / k;
+      ctx.strokeStyle = style.stroke;
+      ctx.beginPath();
+      traceOrganicBubble(ctx, b.x, b.y, haloR, b.seed, k);
+      ctx.stroke();
     }
   }, [bubbles, viewRef]);
 
@@ -929,38 +1095,32 @@ const BubbleChart = ({
     zoomTo(b.x, b.y, Math.max(FOCUS_ZOOM_LEVEL, FOCUS_SCREEN_RADIUS / b.r));
   }, [focusRequest, bubbles, indexByEmail, zoomTo]);
 
-  /* ---- wheel zoom (towards the cursor) ---- */
+  /* ---- continuous wheel / trackpad zoom toward cursor ---- */
   useEffect(() => {
     const el = canvasRef.current;
     if (!el) return;
 
-    let raf = 0;
-    let pending = 1;
-    let ox = 0;
-    let oy = 0;
-
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const rect = el.getBoundingClientRect();
-      ox = e.clientX - rect.left - rect.width / 2;
-      oy = e.clientY - rect.top - rect.height / 2;
-      pending *= e.deltaY < 0 ? WHEEL_ZOOM_IN : WHEEL_ZOOM_OUT;
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        zoomAt(pending, ox, oy);
-        pending = 1;
-        raf = 0;
-      });
+      const ox = e.clientX - rect.left - rect.width / 2;
+      const oy = e.clientY - rect.top - rect.height / 2;
+
+      // Normalize line/page wheel modes to pixels
+      let dy = e.deltaY;
+      if (e.deltaMode === 1) dy *= 16;
+      else if (e.deltaMode === 2) dy *= rect.height;
+
+      // Exponential zoom scales naturally for both trackpads and mouse wheels
+      const factor = Math.exp(-clamp(dy, -250, 250) * WHEEL_ZOOM_SPEED);
+      zoomAt(factor, ox, oy);
     };
 
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => {
-      el.removeEventListener("wheel", onWheel);
-      if (raf) cancelAnimationFrame(raf);
-    };
+    return () => el.removeEventListener("wheel", onWheel);
   }, [zoomAt]);
 
-  /* ---- pointer handling: hit-test, pan, drag ---- */
+  /* ---- pointer handling: hit-test, pan with inertia, drag ---- */
   const toWorld = (clientX: number, clientY: number) => {
     const rect = canvasRef.current!.getBoundingClientRect();
     const { x, y, k } = viewRef.current;
@@ -1016,6 +1176,13 @@ const BubbleChart = ({
         x: e.clientX - viewRef.current.x,
         y: e.clientY - viewRef.current.y,
       };
+      panTrackRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        t: performance.now(),
+        vx: 0,
+        vy: 0,
+      };
     }
     setGrabbing(true);
   };
@@ -1026,7 +1193,26 @@ const BubbleChart = ({
       moveDrag(toWorld(e.clientX, e.clientY));
     } else if (mode === "pan") {
       const start = panStartRef.current;
-      setView(e.clientX - start.x, e.clientY - start.y, viewRef.current.k);
+      const now = performance.now();
+      const track = panTrackRef.current;
+      const dt = now - track.t;
+
+      if (dt > 0) {
+        // Exponential moving average of pointer velocity (px per 16.67ms frame)
+        const instVx = ((e.clientX - track.x) / dt) * 16.667;
+        const instVy = ((e.clientY - track.y) / dt) * 16.667;
+        track.vx = track.vx * 0.5 + instVx * 0.5;
+        track.vy = track.vy * 0.5 + instVy * 0.5;
+        track.x = e.clientX;
+        track.y = e.clientY;
+        track.t = now;
+      }
+
+      setViewImmediate(
+        e.clientX - start.x,
+        e.clientY - start.y,
+        viewRef.current.k,
+      );
     } else if (e.pointerType === "mouse") {
       const world = toWorld(e.clientX, e.clientY);
       setHoverIdx(hitTest(world.x, world.y), e.clientX, e.clientY);
@@ -1034,7 +1220,15 @@ const BubbleChart = ({
   };
 
   const onPointerEnd = () => {
-    if (modeRef.current === "drag") endDrag();
+    if (modeRef.current === "drag") {
+      endDrag();
+    } else if (modeRef.current === "pan") {
+      const track = panTrackRef.current;
+      // Only throw if pointer was moving recently (< 60ms ago)
+      if (performance.now() - track.t < 60) {
+        throwPan(clamp(track.vx, -60, 60), clamp(track.vy, -60, 60));
+      }
+    }
     modeRef.current = "none";
     setGrabbing(false);
   };
@@ -1079,7 +1273,11 @@ const BubbleChart = ({
         <ControlButton label="Zoom out" onClick={() => zoomAt(1 / BUTTON_ZOOM)}>
           &minus;
         </ControlButton>
-        <ControlButton label="Fit all bubbles in view" onClick={fit} small>
+        <ControlButton
+          label="Fit all bubbles in view"
+          onClick={() => fit(true)}
+          small
+        >
           Fit
         </ControlButton>
       </div>
@@ -1109,7 +1307,6 @@ const ListView = ({
   const listRef = useRef<HTMLOListElement>(null);
   const [win, setWin] = useState({ top: 0, height: 800 });
 
-  // Tied scores share a place
   const places = useMemo(() => {
     const out: number[] = new Array(bubbles.length);
     let place = 0;
@@ -1143,7 +1340,6 @@ const ListView = ({
     return () => observer.disconnect();
   }, [measure]);
 
-  // Scroll to a person picked in the search bar
   useEffect(() => {
     if (!focusRequest || focusRequest.view !== "list") return;
     if (handledFocusRef.current === focusRequest) return;
@@ -1161,7 +1357,6 @@ const ListView = ({
       0,
       rowTop - scroller.clientHeight / 2 + ROW_HEIGHT / 2,
     );
-    // A smooth scroll across thousands of rows is slow, so only animate short hops
     const far = Math.abs(top - scroller.scrollTop) > 4000;
     scroller.scrollTo({
       top,
@@ -1272,8 +1467,6 @@ const NameFinder = ({ bubbles, onSelect }: NameFinderProps) => {
 
   const matchingAttendees = useMemo(() => {
     if (!trimmed) return [];
-    // Split into tokens so "jane doe" or "doe jane" both match.
-    // Bubbles are sorted by points, so we stop as soon as we have enough.
     const parts = trimmed.split(/\s+/);
     const out: Bubble[] = [];
     for (const b of bubbles) {
@@ -1319,7 +1512,7 @@ const NameFinder = ({ bubbles, onSelect }: NameFinderProps) => {
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder="Find first & last name..."
-          className="h-11 w-full rounded-xl bg-black/40 pl-10 pr-9 text-sm text-white placeholder-white/50 backdrop-blur-md ring-1 ring-white/15 outline-none transition-all focus:bg-black/60 focus:ring-2 focus:ring-white/40"
+          className="h-11 w-full rounded-xl bg-black/40 pl-5 pr-9 text-sm text-white placeholder-white/50 backdrop-blur-md ring-1 ring-white/15 outline-none transition-all focus:bg-black/60 focus:ring-2 focus:ring-white/40"
         />
         {query && (
           <button
@@ -1371,7 +1564,6 @@ export const Leaderboard = ({ pairs }: { pairs: Pair[] }) => {
 
   const handleSelectAttendee = (b: Bubble) => {
     setHighlightedEmail(b.email);
-    // Whichever view is showing consumes this; the other one ignores it
     setFocusRequest({ email: b.email, view, nonce: Date.now() });
   };
 
