@@ -8,4 +8,4 @@ export { default as MoreEvents } from "./event_components/MoreEvents";
 export { default as MagneticDots } from "./DotBackground";
 export { default as MatrixBackground } from "./MatrixBackground";
 export { default as Countdown } from "./Countdown";
-export { default as Leaderboard } from "./leaderboard_components/Leaderboard";
+export { default as Leaderboard } from "./Leaderboard/Leaderboard";
